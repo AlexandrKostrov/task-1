@@ -9,11 +9,11 @@ mongoose.connect('mongodb://localhost:27017/users', { useNewUrlParser: true });
 app.use(bodyParser.json());
 
  
-const { Users } = require('./models/Users');
+const { User } = require('./models/User');
  
 
 app.get('/chat', (req, res) => {
-    Users.find({}, (err, doc) => {
+    User.find({}, (err, doc) => {
         if (err) return res.status(400).send(err);
         res.send(doc);
     });
