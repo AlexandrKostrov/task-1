@@ -1,0 +1,34 @@
+{
+  "name": "task-1",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server/server.js",
+    "server": "nodemon server/server.js",
+    "client": "npm run start --prefix client",
+"dev": "concurrently \"npm run server\" \"npm run client\""
+  },
+  "engines": {
+    "node": "8.10.0"
+},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AlexandrKostrov/task-1.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/AlexandrKostrov/task-1/issues"
+  },
+  "homepage": "https://github.com/AlexandrKostrov/task-1#readme",
+  "dependencies": {
+    "mongoose": "^5.3.1",
+    "socket.io": "^2.1.1",
+    "ws": "^6.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^1.18.4"
+  }
+}
