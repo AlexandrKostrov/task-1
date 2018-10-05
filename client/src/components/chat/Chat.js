@@ -9,11 +9,7 @@ constructor(props){
 }
 
 state = {
-    users: [{
-        nick:12345
-    }],
-    endpoint: "http://localhost::3001",
-    color: 'white',
+    users: [],
     messages: [],
     socket: socketIOClient(),
 }
@@ -26,25 +22,17 @@ componentDidMount() {
     this.state.socket.on('message', (msg) => {
        const newMsgs = [...this.state.messages];
         newMsgs.push(msg);
+         this.setState({users: msg.users});
         this.setState({messages: newMsgs});
     })
 }
 
 send =  (event) => {
-    // const socket = socketIOClient();
-    
-    // this emits an event to the socket (your server) with an argument of 'red'
-    // you can make the argument any color you would like, or any kind of data you want to send.
-    
-    this.state.socket.emit('message', this.inp.value); 
+    this.state.socket.emit('message', JSON.stringify({message:this.inp.value, nick:this.props.nick})); 
     this.inp.value = '';
-    //return false;
-    // socket.emit('change color', 'red', 'yellow') | you can have multiple arguments
   }
 
-  setColor = (color) => {
-    this.setState({ color })
-  }
+ 
 
  handleRef = (node) => {
     this.div = node;
@@ -52,16 +40,17 @@ send =  (event) => {
  inputRef = (node) => {
      this.inp = node;
  }
+  
+ renderUsers () {
+    return (this.state.users.map( (user, index) => {
+        return (
+            <li key = {index}>{user}</li>
+        )
+    }));
+ }
 
- getUsers = async () => {     
-        const users = await axios.get(`/chat`)
-        .then(r => r.data);
-        console.log(users);
-        this.setState({users});
-        this.send();
-    }
     render() {
-         
+          
         
         return (
             
@@ -69,14 +58,17 @@ send =  (event) => {
            <ul>
              {this.state.messages.map((msg,index) => {
                  return (
-                     <li key={index}>{this.props.nick + " " +msg}</li>
+                     <li key={index}>{msg.nick + " " +msg.message}</li>
                  )
              })}
            </ul>
             
                <input type="text" ref={this.inputRef} />
-               <button onClick = {this.send }>Send Message</button>
-           
+               <button onClick = {this.send } >Send Message</button>
+            <ul>
+              {this.renderUsers()}
+            </ul>
+
         </div>
            )
     }

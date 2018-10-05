@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
  
 import './App.css';
-import Chat from './components/chat/chat';
+import Chat from './components/chat/Chat';
 import Form from './components/authForm/Form';
 
 class App extends Component {

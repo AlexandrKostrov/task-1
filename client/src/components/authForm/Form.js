@@ -1,7 +1,9 @@
 import React, { Component}  from 'react';
-import Chat from '../chat/chat';
+import Chat from '../chat/Chat';
 import axios from 'axios'
 import './style.css';
+
+
 
 class Form extends React.Component {
 state = {
@@ -16,9 +18,11 @@ onSubmit = event => {
     password: event.target.password.value
    }
 
-   axios.post('/', data).then(res => {console.log(res.data.nick );
+   axios.post('/', data).then(res => {console.log(res);
      this.setState({nick: res.data.nick});
+     
   });
+  
    this.setState({chat : true})
 }
 

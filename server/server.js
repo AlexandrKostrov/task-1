@@ -13,12 +13,18 @@ var session = require('express-session');
 const server = require('http').Server(app);
 
 const io = require('socket.io')(server);
-
+const users = [];
 // This is what the socket.io syntax is like, we will work this later
 io.on('connection', function(socket){
     console.log('a user connected');
     socket.on('message', function(msg){
-        io.emit('message', msg);
+        
+        const msgObject = JSON.parse(msg);
+        if(users.indexOf(msgObject.nick) == -1)
+       { users.push(msgObject.nick);}
+        msgObject.users = users;
+        console.log(msgObject);
+        io.emit('message',msgObject);
       });
   });
 

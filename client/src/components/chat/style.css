@@ -15,6 +15,7 @@ body {
     margin: 2% auto;
     width: 760px;
     background: #444753;
+    display: flex;
 }
 
 .users-list {
