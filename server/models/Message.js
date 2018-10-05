@@ -2,14 +2,9 @@ const mongoose = require('mongoose'),
       Schema = mongoose.Schema;
 
 const MessageSchema = new Schema({  
-  body: {
-    type: String,
-    required: true
-  },
-  author: {
-    type: Schema.Types.ObjectId,
-    ref: 'User'
-  }
+  date: {type: Date},
+  content: {type: String},
+  username: {type: String}
 },
 {
   timestamps: true // Saves createdAt and updatedAt as dates. createdAt will be our timestamp.

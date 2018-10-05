@@ -2,13 +2,9 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const UserSchema = new Schema({
-    FI: {
+  
+    nick: {
         type: String,
-        required: true,
-        maxlength: 120,
-},
-nick: {
-    type: String,
         required: true,
         maxlength: 50,
 }
@@ -17,6 +13,10 @@ nick: {
         type: String,
         required: true,
 },
+    password: {
+        type: String,
+        required: true,
+    }
 })
 
 const User = mongoose.model('user', UserSchema);

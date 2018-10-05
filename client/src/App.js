@@ -1,12 +1,17 @@
 import React, { Component } from 'react';
  
 import './App.css';
-import Chat from './components/chat';
+import Chat from './components/chat/chat';
+import Form from './components/authForm/Form';
 
 class App extends Component {
   render() {
     return (
-      <Chat/>
+      <div>
+        <Form/>
+        {/* <Chat/>  */}
+      </div>
+      
     );
   }
 }

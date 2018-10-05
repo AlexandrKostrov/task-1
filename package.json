@@ -8,11 +8,11 @@
     "start": "node server/server.js",
     "server": "nodemon server/server.js",
     "client": "npm run start --prefix client",
-"dev": "concurrently \"npm run server\" \"npm run client\""
+    "dev": "concurrently \"npm run server\" \"npm run client\""
   },
   "engines": {
     "node": "8.10.0"
-},
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/AlexandrKostrov/task-1.git"
@@ -24,6 +24,7 @@
   },
   "homepage": "https://github.com/AlexandrKostrov/task-1#readme",
   "dependencies": {
+    "bcryptjs": "^2.4.3",
     "mongoose": "^5.3.1",
     "socket.io": "^2.1.1",
     "ws": "^6.0.0"
