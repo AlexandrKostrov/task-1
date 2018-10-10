@@ -3,7 +3,7 @@
 const app = require('express')();
 // const socketIO = require('socket.io');
 const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs');
+
 var async = require('async');
 const bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
@@ -11,30 +11,11 @@ var session = require('express-session');
 
 
 const server = require('http').Server(app);
+const MongoStore = require('connect-mongo')(session);
+const { User } = require('./models/User');
 
 const io = require('socket.io')(server);
-const users = [];
-// This is what the socket.io syntax is like, we will work this later
-io.on('connection', function(socket){
-    console.log('a user connected');
-    socket.on('message', function(msg){
-        
-        const msgObject = JSON.parse(msg);
-        if(users.indexOf(msgObject.nick) == -1)
-       { users.push(msgObject.nick);}
-        msgObject.users = users;
-        console.log(msgObject);
-        io.emit('message',msgObject);
-      });
-  });
-
-mongoose.Promise = global.Promise;
-mongoose.connect('mongodb://localhost:27017/users', { useNewUrlParser: true });
-
-app.use(bodyParser.json());
-app.use(cookieParser());
-const MongoStore = require('connect-mongo')(session);
-app.use(session({
+const sessionMidleware = session({
     "secret": "KillerIsJim",
     "key": "sid",
     "cookie": {
@@ -43,73 +24,88 @@ app.use(session({
         "maxAge": null
     },
     store: new MongoStore({ mongooseConnection: mongoose.connection }),
-}));
+});
+
+const curUsers = [];
+
+// This is what the socket.io syntax is like, we will work this later
+io.use(function(socket, next) {
+    sessionMidleware(socket.request, socket.request.res, next);
+  })
+
+io.on('connection', function(socket){
+    console.log('a user connected');
+    
+    
+    socket.on('userList', function () {
+       User.find({active:true}).then(otv => {
+        io.emit('userList',otv);
+     });
+    });
+    socket.on('logout', function(nick) {
+        const userNick = JSON.parse(nick);
+        console.log('nick',userNick.nick);
+        User.update({nick:userNick.nick},{$set:{active: false}}).then( 
+             User.find({active:true}).then(otv => {
+             console.log("active users", otv)
+            io.emit('logout',otv);
+         })
+        );
+         
+    })
+    socket.on('message', function(msg){
+        
+        const msgObject = JSON.parse(msg);
+      
+        
+        console.log(msgObject);
+        console.log(socket.request.session.user);
+        io.emit('message',msgObject);
+      });
+  });
+
+
+mongoose.Promise = global.Promise;
+mongoose.connect('mongodb://localhost:27017/users', { useNewUrlParser: true });
+
+app.use(bodyParser.json());
+app.use(cookieParser());
+
+
+app.use(sessionMidleware);
 // app.use((req, res, next) => {
 //     req.session.numberOfVisits = req.session.numberOfVisits + 1 || 1;
 //     res.send(`Visits ${req.session.numberOfVisits}`);
 // })
  
-const { User } = require('./models/User');
  
 
 app.get('/', (req,res) => {
     res.send("Connected successfully!");
+  
 })
 
-app.get('/chat', (req, res) => {
-    User.find({}, (err, doc) => {
-        if (err) return res.status(400).send(err);
-        res.send(doc);
-    });
+app.post('/logout', (req, res) => {
+    req.session.destroy();
+   
 });
-app.post('/', (req, res) => {
+
+ app.post('/chat', (req, res) => {
+     const nick = req.body.nick;
+     const email = req.body.email;
+     const password = req.body.password;
+    // const active = true;
+     User.authorize(nick, email, password, function (user){  
+         req.session.user = user._id;
     
-    const newUser = new User({
-        nick: req.body.nick,
-        email: req.body.email,
-        password: req.body.password
-    });
-    bcrypt.genSalt(10, (err, salt) => {
-        bcrypt.hash(newUser.password, salt, (err, hash) => {
-            if(err) throw err;
-            newUser.password = hash;
-           // newUser.save().then(user => res.send(user));
-        })
-    });   
-    User.findOne({email: newUser.email}).then(
-        user => {
-            console.log(user);
-            
-             if(user){
-            //     bcrypt.compare(newUser.password, user.password, (err, isMatch) => {
-            //         if(err) throw err;
-            //         if(isMatch) {
-            //             console.log(user);
-            res.send(user);
-                  }
-            //     })}
-            else {
-                 newUser.save().then(user => res.send(user));
-             }
-        }
-    )
-    
-    // User.findOne({nick:user.nick}, (err, doc) => {
-    //     if (err) return res.status(400).send(err);
-         
-    //     res.send(doc); 
-    //     // else {
-    //     //     User.create({nick:nick,email:email,password:password}, (err, doc) => {
-    //     //         if (err) return res.status(400).send(err);
-    //     //         res.send(doc);
-    //     //     })
-    //     // }
-    // });
-   // res.send({nick,password});
-});
+         res.send(user);
+     });
+ });
+
+
 
 const port = process.env.PORT || 3001;
 server.listen(port, () => {
     console.log(port);
     console.log("SERVER RUNNING")
-})
+}) 

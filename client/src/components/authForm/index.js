@@ -1,17 +1,16 @@
-// import { compose, withHandlers, withState } from 'recompose';
-// import { connect } from 'react-redux';
-// import Form from './Form';
-// import userAdd from '../../functions/actions';
+//  import { compose, withHandlers, withState } from 'recompose';
+//  import { connect } from 'react-redux';
+//  import Form from './Form';
+//  import getUser from '../reducers/users';
 
-// export default compose(
-//     connect(
-//       ({ users  }) => ({
-//         users 
-       
-//       } ),
-//       {
-//        // userAdd
-//       }
-//     ),
  
-//   )(Form);
+//  export default compose(
+//      connect(
+//        ({ users  }) => ({
+//          users      
+//        } ),
+//        {
+//         getUser
+//        }
+//      ),
+//    )(Form);
