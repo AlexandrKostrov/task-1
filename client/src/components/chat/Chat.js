@@ -68,6 +68,7 @@ send =  (event) => {
     localStorage.removeItem('nick');
     this.setState({nick:''});
     this.state.socket.emit('logout',JSON.stringify({nick: this.state.nick}));
+    this.state.socket.emit('userList','');
     window.history.back();
     
   }

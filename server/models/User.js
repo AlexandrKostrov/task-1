@@ -32,8 +32,9 @@ UserSchema.statics.authorize = function (nick, email, password, callback) {
             //console.log(user);
             
              if(user){
-                user.active = true;
-                callback(user);
+                 console.log("inner user ",user.nick)
+                User.update({nick:user.nick},{$set:{active: true}}).then(res => callback(user))
+               
                   }
 
             else {
