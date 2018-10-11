@@ -36,7 +36,7 @@ initialState(){
 }
 
 componentWillMount() {
-    
+
 } 
 componentDidMount() {
     this.initialState();
@@ -54,9 +54,10 @@ componentDidMount() {
         this.setState({allUsers:users})
         console.log(this.state.allUsers);
     });
-    this.state.socket.on('mute', (nick) => {
-        if(localStorage.getItem('nick') == nick) {
-            this.setState({mute: true});
+    this.state.socket.on('mute', (response) => {
+        console.log(response);
+        if(localStorage.getItem('token') == response.token) {
+            this.setState({mute: response.muted});
             console.log('user mutted',this.state.mute);
         }
        

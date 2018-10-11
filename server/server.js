@@ -44,17 +44,30 @@ io.on('connection', function(socket){
         })
          });
     
-    
+    socket.on('ban', function (token) {
+        User.findByToken(token, (user) => {
+            user.banned = !user.banned;
+            user.save();
+            console.log(user);
+            // io.emit('initUser',user);
+        })
+    })
     socket.on('userList', function () {
        User.find({active:true}).then(otv => {
         io.emit('userList',otv);
      });
     });
-    socket.on('mute', function (nick) {
-        User.update({nick:nick},{$set:{muted: true}}).then(res =>
-           {
-           io.emit('mute',nick)}
-       );
+    socket.on('mute', function (token) {
+        User.findByToken(token, (user) => {
+            user.muted = !user.muted;
+            user.save();
+            console.log(user);
+             io.emit('mute',{token:token,muted:user.muted});
+        })
+    //     User.update({nick:nick},{$set:{muted: true}}).then(res =>
+    //        {
+    //        io.emit('mute',nick)}
+    //    );
          });
     // socket.on('checkState', function(nick) {
     //     console.log("INCOMING nick:",nick)
