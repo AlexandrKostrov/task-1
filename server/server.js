@@ -42,6 +42,21 @@ io.on('connection', function(socket){
         io.emit('userList',otv);
      });
     });
+    socket.on('mute', function (nick) {
+        User.update({nick:nick},{$set:{muted: true}}).then(res =>
+           {
+           io.emit('mute',nick)}
+       );
+         });
+    socket.on('checkState', function(nick) {
+        console.log("INCOMING nick:",nick)
+        User.findOne({nick: nick}).then(res => {
+           const banned = res.banned;
+           const mutted = res.mutted;
+           const nick = res.nick;
+           io.emit('checkState', {banned:banned,mutted:mutted,nick:nick});
+       })
+    });     
     socket.on('logout', function(nick) {
         const userNick = JSON.parse(nick);
         console.log('nick',userNick.nick);
@@ -50,9 +65,11 @@ io.on('connection', function(socket){
              console.log("active users", otv)
             io.emit('logout',otv);
          })
-        );
-         
-    })
+        );  
+    });
+    socket.on('getAllUsers', function() {
+       User.find({}).then(res => io.emit('getAllUsers',res));
+    });
     socket.on('message', function(msg){
         
         const msgObject = JSON.parse(msg);

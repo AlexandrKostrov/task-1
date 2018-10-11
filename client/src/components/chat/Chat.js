@@ -1,27 +1,36 @@
 import React, { Component}  from 'react';
 import socketIOClient from 'socket.io-client';
- 
+import UserList from '../userList/UserList';
 import axios from 'axios';
  
  
 import './style.css';
 
 class Chat extends React.Component    {
-constructor(props){
-    super(props);
-}
+// constructor(props){
+//     super(props);
+// }
 
 state = {
     nick: '',
     messages: [],
     socket: socketIOClient(),
     activeUsers: [],
+    allUsers: [],
+     
+   
 }
 
 initialState(){
     const nick = localStorage.getItem('nick');
+    const admin = localStorage.getItem('admin');
+     
     console.log(nick);
-    this.setState({nick:nick});
+    console.log(admin);
+    
+     
+    this.setState({admin:admin,nick:nick});
+    console.log('i am admin',this.state.admin );
 }
 
 componentDidMount() {
@@ -31,6 +40,18 @@ componentDidMount() {
         this.setState({activeUsers: users});
         console.log(this.state.activeUsers);
     });
+    this.state.socket.on('getAllUsers', (users)=>{
+        this.setState({allUsers:users})
+        console.log(this.state.allUsers);
+    });
+    this.state.socket.on('mute', (nick) => {
+        if(localStorage.getItem('nick') == nick) {
+            this.setState({mute: true});
+            console.log('user mutted',this.state.mute);
+        }
+       
+    });
+  
     // socket.on is another method that checks for incoming events from the server
     // This method is looking for the event 'change color'
     // socket.on takes a callback function for the first argument
@@ -78,13 +99,34 @@ send =  (event) => {
  usersList = (node) => {
      this.list = node;
  }
- 
+  drawUsers() {
+     
+ }
+ getUsers = () => {
+    this.state.socket.emit('getAllUsers');
+    if(this.state.allUsers.length) {
+        return (
+            <ul>
+ {this.state.allUsers.map(user => {
+             return(
+         <li>{user}</li>
+             )
+         })}
+            </ul>
+        )
+        
+        return;
+    }
+    
+ }
 
     render() {
-          
-       
+          const mute = this.state.mute;
+        console.log("Why? this.state.nick",this.state.nick)
+        console.log("Why? n,this.state.mute",this.state.mute)
+      
         return (
-         ( this.state.nick &&
+           this.state.nick &&
             <div>
          
             <div className="container clearfix" ref = {this.handleRef}> 
@@ -95,17 +137,29 @@ send =  (event) => {
                      <li key={index}>{msg.nick + " " +msg.message}</li>
                  )
              })}
+             
            </ul>
             
                <input type="text" ref={this.inputRef} />
-               <button onClick = {this.send } >Send Message</button>
+              { !this.state.mute &&
+              <div> 
+               <button onClick={this.send}>Send Message</button> 
+               </div>}
+               
+             
             <ul ref={this.usersList}>
               {this.renderUsers()}
             </ul>
         <button onClick={this.logout}>logout</button>
         
         </div>
-        </div>)
+        {this.state.admin && 
+        <div>
+        <button onClick={this.getUsers}>List of all users</button> 
+        <UserList allUsers={this.state.allUsers} socket={this.state.socket}/>
+        </div>
+        }
+        </div> 
            )
     }
 
