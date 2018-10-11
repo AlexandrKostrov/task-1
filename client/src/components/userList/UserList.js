@@ -4,13 +4,13 @@ const UserList = ({allUsers, socket}) => {
 
     const muteUser = (nick) => () => {
         console.log(nick);
-        socket.emit('mute',nick);
+        socket.emit('mute', nick);
     }
 
-    // const muteUser = (nick) => () => {
-    //     console.log(nick);
-    //     socket.emit('mute',nick);
-    // }
+     const banUser = (nick) => () => {
+         console.log(nick);
+         socket.emit('ban', nick);
+     }
 
     return (
       
@@ -20,7 +20,7 @@ const UserList = ({allUsers, socket}) => {
                 <li key={index}>
                    {user.nick}
                    <button onClick={muteUser(user.nick)}>mute</button>
-                   {/* <button onClick={banUser(user.nick)}>mute</button> */}
+                   {/* <button onClick={banUser(user.nick)}>ban</button>   */}
                 </li>
             )
         })}

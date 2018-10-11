@@ -7,35 +7,45 @@ import axios from 'axios';
 import './style.css';
 
 class Chat extends React.Component    {
-// constructor(props){
-//     super(props);
-// }
+constructor(props){
+    super(props);
+    const token = localStorage.getItem('token');
+    this.state = {token:token,socket: socketIOClient(),messages: [],activeUsers: [],allUsers: [],}
+}
 
-state = {
-    nick: '',
-    messages: [],
-    socket: socketIOClient(),
-    activeUsers: [],
-    allUsers: [],
+// state = {
+//     nick: '',
+//     messages: [],
+//     socket: socketIOClient(),
+//     activeUsers: [],
+//     allUsers: [],
      
    
-}
+// }
 
 initialState(){
-    const nick = localStorage.getItem('nick');
-    const admin = localStorage.getItem('admin');
-     
-    console.log(nick);
-    console.log(admin);
+    // const nick = localStorage.getItem('nick');
+    // const admin = localStorage.getItem('admin');
+    this.state.socket.emit('initUser',this.state.token); 
+    console.log(this.state.token);
+    // console.log(admin);
     
      
-    this.setState({admin:admin,nick:nick});
-    console.log('i am admin',this.state.admin );
+    // this.setState({admin:admin,nick:nick});
+    // console.log('i am admin',this.state.admin );
 }
 
+componentWillMount() {
+    
+} 
 componentDidMount() {
     this.initialState();
     this.state.socket.emit('userList','');
+    this.state.socket.on('initUser', (user) => {
+        if(this.state.token === user.token)
+       { this.setState({nick: user.nick, admin: user.admin,mute: user.muted});}
+        console.log("AutorizedUser", user);
+    });
     this.state.socket.on('userList', (users) => {
         this.setState({activeUsers: users});
         console.log(this.state.activeUsers);
@@ -126,7 +136,7 @@ send =  (event) => {
         console.log("Why? n,this.state.mute",this.state.mute)
       
         return (
-           this.state.nick &&
+           this.state.token &&
             <div>
          
             <div className="container clearfix" ref = {this.handleRef}> 

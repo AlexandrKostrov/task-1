@@ -22,10 +22,9 @@ class Form extends React.Component {
       password: event.target.password.value
      }
      axios.post('/chat', data).then(res => {console.log(res);
-      localStorage.setItem('nick', res.data.nick);
-      localStorage.setItem('muted', res.data.muted);
-      console.log('First step', res.data.muted)
-      res.data.admin && localStorage.setItem('admin', res.data.admin);
+      localStorage.setItem('token', res.data.token);
+     
+      //res.data.admin && localStorage.setItem('admin', res.data.admin);
    }).then(()=>this.props.history.push(`/chat`)); 
   }
 

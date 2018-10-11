@@ -35,6 +35,14 @@ io.use(function(socket, next) {
 
 io.on('connection', function(socket){
     console.log('a user connected');
+
+    socket.on('initUser', function (token) {
+        console.log("INCOMINGTOKEN", token);
+        User.findByToken(token,(user) => {
+            console.log("ToKEN", user);
+            io.emit('initUser',user);
+        })
+         });
     
     
     socket.on('userList', function () {
@@ -48,15 +56,15 @@ io.on('connection', function(socket){
            io.emit('mute',nick)}
        );
          });
-    socket.on('checkState', function(nick) {
-        console.log("INCOMING nick:",nick)
-        User.findOne({nick: nick}).then(res => {
-           const banned = res.banned;
-           const mutted = res.mutted;
-           const nick = res.nick;
-           io.emit('checkState', {banned:banned,mutted:mutted,nick:nick});
-       })
-    });     
+    // socket.on('checkState', function(nick) {
+    //     console.log("INCOMING nick:",nick)
+    //     User.findOne({nick: nick}).then(res => {
+    //        const banned = res.banned;
+    //        const mutted = res.mutted;
+    //        const nick = res.nick;
+    //        io.emit('checkState', {banned:banned,mutted:mutted,nick:nick});
+    //    })
+    // });     
     socket.on('logout', function(nick) {
         const userNick = JSON.parse(nick);
         console.log('nick',userNick.nick);

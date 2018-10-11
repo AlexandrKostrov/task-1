@@ -85,6 +85,15 @@ UserSchema.statics.authorize = function (nick, email, password, callback) {
     )
 }
 
+UserSchema.statics.findByToken = function (token, cb) {
+  const user = this;
+  jwt.verify(token,'supersecret', (err, decode) => {
+      user.findOne({_id:decode,token:token}).then((user) => {
+          
+          cb(user);
+      })
+  }) 
+}
 // UserSchema.methods.generateToken = function (cb) {
 //     const user = this;
 //     const token = jwt.sign(user._id.toHexString(), 'supersecret');
