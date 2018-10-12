@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const getRandomColor = require('../functions/generateColor.js');
 
 const UserSchema = new Schema({
   
@@ -40,6 +41,14 @@ token: {
         type: Boolean,
         required: false,
     },
+    sended: {
+        type: Boolean,
+        required: true, 
+    },
+    color: {
+        type: String,
+        required: true,
+    }
 });
 
 UserSchema.statics.authorize = function (nick, email, password, callback) {
@@ -54,14 +63,11 @@ UserSchema.statics.authorize = function (nick, email, password, callback) {
                    if(err) throw err;
                    console.log("PASSWORD CHECKING LOGGING",isMatch);
                    if(isMatch)
-                  { User.update({nick:user.nick},{$set:{active: true}}).then(res => callback(user))}
+                  { User.update({nick:user.nick},{$set:{active: true,sended: false}}).then(res => callback(user))}
                   else {
                       callback("The password is not correct");
                   }
-                 })
-               
-               
-                  }
+                 }) }       
 
             else {
               
@@ -72,7 +78,10 @@ UserSchema.statics.authorize = function (nick, email, password, callback) {
                         admin = true;
                       }
                       if(/^[a-zA-Z0-9- ]{3,}$/.test(nick) == false) {callback("Your name is not correct!")}
-                      else {   const user = new User({nick: nick, email: email, password: password, active: true, admin: admin, banned: false, muted: false});
+                      else {  
+                        const color = getRandomColor();
+                        const user = new User({nick: nick, email: email, password: password, active: true, 
+                        admin: admin, banned: false, muted: false, sended: false,color: color});
                       admin = false;
                       bcrypt.genSalt(10, (err, salt) => {
                         bcrypt.hash(user.password, salt, (err, hash) => {

@@ -64,23 +64,19 @@ io.on('connection', function(socket){
             user.save();
             console.log(user);
              io.emit('mute',{token:token,muted:user.muted});
-        })
-    //     User.update({nick:nick},{$set:{muted: true}}).then(res =>
-    //        {
-    //        io.emit('mute',nick)}
-    //    );
-         });
-    // socket.on('checkState', function(nick) {
-    //     console.log("INCOMING nick:",nick)
-    //     User.findOne({nick: nick}).then(res => {
-    //        const banned = res.banned;
-    //        const mutted = res.mutted;
-    //        const nick = res.nick;
-    //        io.emit('checkState', {banned:banned,mutted:mutted,nick:nick});
-    //    })
-    // });     
-    socket.on('logout', function(token) {
-           
+        });  
+    });
+    
+    socket.on('msgSend', function(token) {
+        User.findByToken(token, (user) => {
+            user.sended = !user.sended;
+            user.save();
+            console.log(user);
+             io.emit('msgSend',{token:token,sended:user.sended});
+        }); 
+    })    
+
+    socket.on('logout', function(token) {   
         console.log('nick',token);
         User.update({token: token},{$set:{active: false}}).then( 
              User.find({active:true}).then(otv => {
@@ -101,6 +97,7 @@ io.on('connection', function(socket){
                 console.log(msgObject);
                 console.log(msgObject.message.length);
                 console.log(socket.request.session.user);
+                msgObject.color = {color:user.color};
                 io.emit('message',msgObject);}
             }
         })

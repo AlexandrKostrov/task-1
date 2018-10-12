@@ -37,7 +37,13 @@ componentDidMount() {
     this.state.socket.emit('userList','');
     this.state.socket.on('initUser', (user) => {
         if(this.state.token === user.token)
-       { this.setState({nick: user.nick, admin: user.admin,mute: user.muted, ban: user.banned});}
+       { 
+        if(user.admin)   
+       { this.setState({nick: user.nick, admin: user.admin, color: {color: user.color}});}
+        else {
+         this.setState({nick: user.nick, mute: user.muted, ban: user.banned, color: {color: user.color}});
+        } 
+    }
         console.log("AutorizedUser", user);
     });
     this.state.socket.on('ban', user => {
@@ -59,7 +65,13 @@ componentDidMount() {
             this.setState({mute: response.muted});
             console.log('user mutted',this.state.mute);
         }
-       
+    });
+    this.state.socket.on('msgSend', (response) => {
+        console.log(response);
+        if(localStorage.getItem('token') == response.token) {
+            this.setState({sended: response.sended});
+            console.log('user mutted',this.state.sended);
+        }
     });
   
     // socket.on is another method that checks for incoming events from the server
@@ -76,16 +88,17 @@ componentDidMount() {
 send =  (event) => {
     this.state.socket.emit('message', JSON.stringify({message:this.inp.value, nick:this.state.nick, token:this.state.token})); 
     this.inp.value = '';
-    this.state.socket.emit('mute',this.state.token);
+    if(!this.state.admin)
+   { this.state.socket.emit('msgSend',this.state.token);
     setTimeout(() => {
-        this.state.socket.emit('mute',this.state.token);
-    },5000);
+        this.state.socket.emit('msgSend',this.state.token);
+    },5000);}
   }
 
  renderUsers () {
     return this.state.activeUsers.map((user, index) => {
          return (
-             <li key={index}>{user.nick}</li>
+             <li key={index} style={{color: user.color}}>{user.nick}</li>
          )
      })
  }
@@ -114,9 +127,7 @@ send =  (event) => {
  usersList = (node) => {
      this.list = node;
  }
-  drawUsers() {
-     
- }
+
  getUsers = () => {
     this.state.socket.emit('getAllUsers');
     if(this.state.allUsers.length) {
@@ -130,7 +141,7 @@ send =  (event) => {
             </ul>
         )
         
-        return;
+      
     }
     
  }
@@ -139,19 +150,18 @@ send =  (event) => {
           const mute = this.state.mute;
         console.log("Why? this.state.nick",this.state.nick)
         console.log("Why? n,this.state.mute",this.state.mute)
-        console.log("Banned",this.state.ban)
+        console.log("Banned",this.state.sended)
         return this.state.ban ? (<div>YOU ARE BANNED</div>):(
             this.state.token &&  
-            // !this.state.ban && 
+             
            
             <div>
-         
-            <div className="container clearfix" ref = {this.handleRef}> 
+            <div className="container" ref = {this.handleRef}> 
         
-           <ul>
+           <ul className="showMsgs">
              {this.state.messages.map((msg,index) => {
                  return (
-                     <li key={index}>{msg.nick + " " +msg.message}</li>
+                     <li key={index} style={msg.color}>{msg.nick + " " +msg.message}</li>
                  )
              })}
              
@@ -160,7 +170,7 @@ send =  (event) => {
                <input type="text" ref={this.inputRef} />
               { !this.state.mute &&
               <div> 
-               <button onClick={this.send}>Send Message</button> 
+               <button onClick={this.send} className={this.state.sended? "disabled":"able"}>Send Message</button> 
                </div>}
                
              
