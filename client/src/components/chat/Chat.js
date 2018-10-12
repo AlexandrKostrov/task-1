@@ -74,8 +74,12 @@ componentDidMount() {
 }
 
 send =  (event) => {
-    this.state.socket.emit('message', JSON.stringify({message:this.inp.value, nick:this.state.nick})); 
+    this.state.socket.emit('message', JSON.stringify({message:this.inp.value, nick:this.state.nick, token:this.state.token})); 
     this.inp.value = '';
+    this.state.socket.emit('mute',this.state.token);
+    setTimeout(() => {
+        this.state.socket.emit('mute',this.state.token);
+    },5000);
   }
 
  renderUsers () {
@@ -136,9 +140,10 @@ send =  (event) => {
         console.log("Why? this.state.nick",this.state.nick)
         console.log("Why? n,this.state.mute",this.state.mute)
         console.log("Banned",this.state.ban)
-        return (
-            !this.state.ban &&   
-           this.state.token &&
+        return this.state.ban ? (<div>YOU ARE BANNED</div>):(
+            this.state.token &&  
+            // !this.state.ban && 
+           
             <div>
          
             <div className="container clearfix" ref = {this.handleRef}> 

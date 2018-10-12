@@ -16,7 +16,7 @@ const UserList = ({allUsers, socket}) => {
       
         <ul>
        { allUsers.map((user, index) => {
-            return (
+            return user.admin? (<p><li key={index}> {user.nick}</li> <p>Admin</p></p>):(
                 <li key={index}>
                    {user.nick}
                    <button onClick={muteUser(user.token)}>mute</button>

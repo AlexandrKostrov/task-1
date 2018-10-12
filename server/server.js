@@ -95,11 +95,15 @@ io.on('connection', function(socket){
     socket.on('message', function(msg){
         
         const msgObject = JSON.parse(msg);
-      
+        User.findByToken(msgObject.token, (user) => {
+            if(!user.banned || !user.muted){
+                console.log(msgObject);
+                console.log(socket.request.session.user);
+                io.emit('message',msgObject);
+            }
+        })
         
-        console.log(msgObject);
-        console.log(socket.request.session.user);
-        io.emit('message',msgObject);
+       
       });
   });
 
