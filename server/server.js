@@ -78,10 +78,10 @@ io.on('connection', function(socket){
     //        io.emit('checkState', {banned:banned,mutted:mutted,nick:nick});
     //    })
     // });     
-    socket.on('logout', function(nick) {
-        const userNick = JSON.parse(nick);
-        console.log('nick',userNick.nick);
-        User.update({nick:userNick.nick},{$set:{active: false}}).then( 
+    socket.on('logout', function(token) {
+           
+        console.log('nick',token);
+        User.update({token: token},{$set:{active: false}}).then( 
              User.find({active:true}).then(otv => {
              console.log("active users", otv)
             io.emit('logout',otv);

@@ -24,15 +24,9 @@ constructor(props){
 // }
 
 initialState(){
-    // const nick = localStorage.getItem('nick');
-    // const admin = localStorage.getItem('admin');
-    this.state.socket.emit('initUser',this.state.token); 
+    if(this.state.token)
+    {this.state.socket.emit('initUser',this.state.token); }
     console.log(this.state.token);
-    // console.log(admin);
-    
-     
-    // this.setState({admin:admin,nick:nick});
-    // console.log('i am admin',this.state.admin );
 }
 
 componentWillMount() {
@@ -97,9 +91,9 @@ send =  (event) => {
     axios.post('/logout').then(
         (res)=>{}
     );
-    localStorage.removeItem('nick');
-    this.setState({nick:''});
-    this.state.socket.emit('logout',JSON.stringify({nick: this.state.nick}));
+    localStorage.removeItem('token');
+    // this.setState({nick:''});
+    this.state.socket.emit('logout',this.state.token);
     this.state.socket.emit('userList','');
     window.history.back();
     
