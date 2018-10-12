@@ -97,9 +97,11 @@ io.on('connection', function(socket){
         const msgObject = JSON.parse(msg);
         User.findByToken(msgObject.token, (user) => {
             if(!user.banned || !user.muted){
+                if(msgObject.message.length<200 ){
                 console.log(msgObject);
+                console.log(msgObject.message.length);
                 console.log(socket.request.session.user);
-                io.emit('message',msgObject);
+                io.emit('message',msgObject);}
             }
         })
         
@@ -139,9 +141,13 @@ app.post('/logout', (req, res) => {
      const password = req.body.password;
     // const active = true;
      User.authorize(nick, email, password, function (user){  
+         if(user._id){
          req.session.user = user._id;
     
-         res.send(user);
+         res.send(user);}
+         else {
+             res.send({msg:user});
+         }
      });
  });
 

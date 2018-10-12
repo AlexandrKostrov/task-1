@@ -44,13 +44,22 @@ token: {
 
 UserSchema.statics.authorize = function (nick, email, password, callback) {
     const User = this;
+
     User.findOne({nick: nick}).then(
         user => {
-            //console.log(user);
             
              if(user){
-                 console.log("inner user ",user.nick)
-                User.update({nick:user.nick},{$set:{active: true}}).then(res => callback(user))
+                 console.log("inner user ",user.nick);
+                 bcrypt.compare(password,user.password, (err,isMatch) => {
+                   if(err) throw err;
+                   console.log("PASSWORD CHECKING LOGGING",isMatch);
+                   if(isMatch)
+                  { User.update({nick:user.nick},{$set:{active: true}}).then(res => callback(user))}
+                  else {
+                      callback("The password is not correct");
+                  }
+                 })
+               
                
                   }
 
@@ -62,7 +71,8 @@ UserSchema.statics.authorize = function (nick, email, password, callback) {
                       if(res.length === 0) {
                         admin = true;
                       }
-                      const user = new User({nick: nick, email: email, password: password, active: true, admin: admin, banned: false, muted: false});
+                      if(/^[a-zA-Z0-9- ]{3,}$/.test(nick) == false) {callback("Your name is not correct!")}
+                      else {   const user = new User({nick: nick, email: email, password: password, active: true, admin: admin, banned: false, muted: false});
                       admin = false;
                       bcrypt.genSalt(10, (err, salt) => {
                         bcrypt.hash(user.password, salt, (err, hash) => {
@@ -75,7 +85,8 @@ UserSchema.statics.authorize = function (nick, email, password, callback) {
                                 callback(user);;
                             });
                         })
-                    });
+                    });}
+                   
                     })
                 
            

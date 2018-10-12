@@ -10,7 +10,10 @@ import './style.css';
 
 
 class Form extends React.Component {
-
+   
+  state ={
+     err:"",   
+   }
 
  
   onSubmit = event => {
@@ -22,10 +25,14 @@ class Form extends React.Component {
       password: event.target.password.value
      }
      axios.post('/chat', data).then(res => {console.log(res);
-      localStorage.setItem('token', res.data.token);
-     
+      if(res.data.token)
+      {localStorage.setItem('token', res.data.token);}
+      else {
+         this.setState({err:res.data.msg}); 
+         throw new Error("This is not corect!");
+      }
       //res.data.admin && localStorage.setItem('admin', res.data.admin);
-   }).then(()=>this.props.history.push(`/chat`)); 
+   }).then(()=>this.props.history.push(`/chat`)).catch(err=> console.log(err)); 
   }
 
 
@@ -47,6 +54,7 @@ logout = () => {
         (<div className="formCont"> 
         <form onSubmit={this.onSubmit}>
         <div className="form-group">
+          <p>{this.state.err}</p>
           <label htmlFor="exampleInputEmail1">Nick</label>
           <input type="text" className="form-control"   name="nick" aria-describedby="emailHelp" placeholder="Enter nick"/>
           <small id="emailHelp" className="form-text text-muted">We'll never share your email with anyone else.</small>
