@@ -13,13 +13,35 @@ body {
 
 .container {
     margin: 2% auto;
-    width: 760px;
+     /* width: 37rem;   */
     background: #f0eee5;
     display: flex;
+    
+}
+
+.main {
+    flex-direction: column;
+    width: 37rem; 
+}
+
+.lists {
+    flex-direction: row;
+}
+
+.inpBtn {
+    flex-direction: row;
+}
+
+.logout {
+    align-self: flex-end;
 }
 
 .showMsgs {
-    height: 20rem;
+    height: 40rem;
+    width: 30rem;
+    background-color: white;
+    border: .2rem solid black;
+    overflow: scroll;
 }
 
 ul {

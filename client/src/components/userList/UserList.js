@@ -1,4 +1,5 @@
 import React from 'react';
+import './style.css'
 
 const UserList = ({allUsers, socket}) => {
 
@@ -14,13 +15,13 @@ const UserList = ({allUsers, socket}) => {
 
     return (
       
-        <ul>
+        <ul className="list-group">
        { allUsers.map((user, index) => {
             return user.admin? (<div key={index}><li key={index}> {user.nick}</li> <p>Admin</p></div>):(
-                <li key={index}>
+                <li key={index} className="list-group-item">
                    {user.nick}
-                   <button onClick={muteUser(user.token)}>mute</button>
-                   <button onClick={banUser(user.token)}>ban</button>    
+                   <button onClick={muteUser(user.token)} className="btn-md btn-warning">mute</button>
+                   <button onClick={banUser(user.token)} className="btn-md btn-danger">ban</button>    
                 </li>
             )
         })}

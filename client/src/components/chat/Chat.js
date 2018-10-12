@@ -155,8 +155,8 @@ send =  (event) => {
             this.state.token &&  
              
            
-            <div>
-            <div className="container" ref = {this.handleRef}> 
+            <div className="container main">
+            <div className="container lists" ref = {this.handleRef}> 
         
            <ul className="showMsgs">
              {this.state.messages.map((msg,index) => {
@@ -167,18 +167,23 @@ send =  (event) => {
              
            </ul>
             
-               <input type="text" ref={this.inputRef} />
-              { !this.state.mute &&
-              <div> 
-               <button onClick={this.send} className={this.state.sended? "disabled":"able"}>Send Message</button> 
-               </div>}
+               
+              
                
              
             <ul ref={this.usersList}>
               {this.renderUsers()}
             </ul>
-        <button onClick={this.logout}>logout</button>
-        
+            </div>
+            <div className="container inpBtn">
+            <input type="text" ref={this.inputRef} />
+            { !this.state.mute &&
+              <div> 
+               <button onClick={this.send} className={this.state.sended? "disabled":"able"}>Send Message</button> 
+               </div>}
+               <div> 
+        <button onClick={this.logout} className="logout">logout</button>
+        </div>
         </div>
         {this.state.admin && 
         <div>
