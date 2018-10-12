@@ -82,6 +82,7 @@ io.on('connection', function(socket){
              User.find({active:true}).then(otv => {
              console.log("active users", otv)
             io.emit('logout',otv);
+            io.disconnect(0);
          })
         );  
     });

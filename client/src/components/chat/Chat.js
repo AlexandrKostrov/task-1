@@ -29,8 +29,8 @@ initialState(){
     console.log(this.state.token);
 }
 
-componentWillMount() {
-
+componentWillUnmount() {
+    this.state.socket.disconnect(0);
 } 
 componentDidMount() {
     this.initialState();
@@ -49,7 +49,7 @@ componentDidMount() {
     this.state.socket.on('ban', user => {
         console.log('BANNED USER', user); 
         if(localStorage.getItem('token') == user.token) 
-       { this.logout();}
+       {this.logout();}
     })
     this.state.socket.on('userList', (users) => {
         this.setState({activeUsers: users});
@@ -74,13 +74,10 @@ componentDidMount() {
         }
     });
   
-    // socket.on is another method that checks for incoming events from the server
-    // This method is looking for the event 'change color'
-    // socket.on takes a callback function for the first argument
+ 
     this.state.socket.on('message', (msg) => {
        const newMsgs = [...this.state.messages];
         newMsgs.push(msg);
-        // this.setState({users: msg.users});
         this.setState({messages: newMsgs});
     })
 }
@@ -115,7 +112,6 @@ send =  (event) => {
         (res)=>{}
     );
     localStorage.removeItem('token');
-    // this.setState({nick:''});
     this.state.socket.emit('logout',this.state.token);
     this.state.socket.emit('userList','');
     window.history.back();
