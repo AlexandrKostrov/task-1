@@ -37,9 +37,14 @@ componentDidMount() {
     this.state.socket.emit('userList','');
     this.state.socket.on('initUser', (user) => {
         if(this.state.token === user.token)
-       { this.setState({nick: user.nick, admin: user.admin,mute: user.muted});}
+       { this.setState({nick: user.nick, admin: user.admin,mute: user.muted, ban: user.banned});}
         console.log("AutorizedUser", user);
     });
+    this.state.socket.on('ban', user => {
+        console.log('BANNED USER', user); 
+        if(localStorage.getItem('token') == user.token) 
+       { this.logout();}
+    })
     this.state.socket.on('userList', (users) => {
         this.setState({activeUsers: users});
         console.log(this.state.activeUsers);
@@ -82,7 +87,8 @@ send =  (event) => {
  }
 
 
-  logout =() => {
+
+  logout = () => {
     this.state.socket.on('logout', (users) => {
         console.log('incoming users', users);
         this.setState({activeUsers: users});
@@ -129,8 +135,9 @@ send =  (event) => {
           const mute = this.state.mute;
         console.log("Why? this.state.nick",this.state.nick)
         console.log("Why? n,this.state.mute",this.state.mute)
-      
+        console.log("Banned",this.state.ban)
         return (
+            !this.state.ban &&   
            this.state.token &&
             <div>
          

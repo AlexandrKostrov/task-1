@@ -49,7 +49,8 @@ io.on('connection', function(socket){
             user.banned = !user.banned;
             user.save();
             console.log(user);
-            // io.emit('initUser',user);
+            io.emit('ban',user);
+            io.disconnect(0);
         })
     })
     socket.on('userList', function () {
