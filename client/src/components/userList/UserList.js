@@ -17,8 +17,9 @@ const UserList = ({allUsers, socket}) => {
       
         <ul className="list-group">
        { allUsers.map((user, index) => {
-            return user.admin? (<div key={index}><li key={index}> {user.nick}</li> <p>Admin</p></div>):(
+            return user.admin? (<div key={index}><img src={`${user.img}.jpg`} alt={user.nick}></img><li key={index}> {user.nick}</li> <p>Admin</p></div>):(
                 <li key={index} className="list-group-item">
+                <img src={user.img} alt={user.nick}></img>
                    {user.nick}
                    <button onClick={muteUser(user.token)} className="btn-md btn-warning">mute</button>
                    <button onClick={banUser(user.token)} className="btn-md btn-danger">ban</button>    

@@ -16,7 +16,6 @@ body {
      /* width: 37rem;   */
     background: #f0eee5;
     display: flex;
-    
 }
 
 .main {
@@ -54,4 +53,11 @@ ul {
 
 .able {
     visibility: visible;
+}
+
+.banned {
+    margin: 0 auto;
+    text-align: center;
+    color: red;
+    font-size: 2.5rem;
 }

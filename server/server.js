@@ -1,20 +1,18 @@
-// const express = require('express');
-// const http = require('http')
 const app = require('express')();
-// const socketIO = require('socket.io');
-const mongoose = require('mongoose');
-
-var async = require('async');
-const bodyParser = require('body-parser');
-var cookieParser = require('cookie-parser');
-var session = require('express-session');
-
-
 const server = require('http').Server(app);
+const io = require('socket.io')(server);
+const config = require('./config.js');
+const mongoose = require('mongoose');
+const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser');
+const session = require('express-session');
+// const passport = require('passport')
+// const FacebookStrategy = require('passport-facebook').Strategy
+
 const MongoStore = require('connect-mongo')(session);
 const { User } = require('./models/User');
 
-const io = require('socket.io')(server);
+
 const sessionMidleware = session({
     "secret": "KillerIsJim",
     "key": "sid",
@@ -26,9 +24,7 @@ const sessionMidleware = session({
     store: new MongoStore({ mongooseConnection: mongoose.connection }),
 });
 
-const curUsers = [];
 
-// This is what the socket.io syntax is like, we will work this later
 io.use(function(socket, next) {
     sessionMidleware(socket.request, socket.request.res, next);
   })
@@ -137,8 +133,11 @@ app.post('/logout', (req, res) => {
      const nick = req.body.nick;
      const email = req.body.email;
      const password = req.body.password;
+     const socialNet = req.body.socialNet;
+     const picture = req.body.picture;
+     const socials = req.body.socials;
     // const active = true;
-     User.authorize(nick, email, password, function (user){  
+     User.authorize(nick, email, password, socialNet, picture, socials, function (user){  
          if(user._id){
          req.session.user = user._id;
     
@@ -149,7 +148,15 @@ app.post('/logout', (req, res) => {
      });
  });
 
-
+//  app.get('/auth/facebook', passport.authenticate('facebook'));
+//  app.get('/auth/facebook/callback',
+//   passport.authenticate('facebook', { 
+//        successRedirect : '/', 
+//        failureRedirect: '/login' 
+//   }),
+//   function(req, res) {
+//     res.redirect('/');
+//   });
 
 const port = process.env.PORT || 3001;
 server.listen(port, () => {

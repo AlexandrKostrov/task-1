@@ -1,6 +1,7 @@
 import React, { Component}  from 'react';
 import socketIOClient from 'socket.io-client';
 import UserList from '../userList/UserList';
+// import initialState from './initialState';
 import axios from 'axios';
  
  
@@ -13,15 +14,7 @@ constructor(props){
     this.state = {token:token,socket: socketIOClient(),messages: [],activeUsers: [],allUsers: [],}
 }
 
-// state = {
-//     nick: '',
-//     messages: [],
-//     socket: socketIOClient(),
-//     activeUsers: [],
-//     allUsers: [],
-     
-   
-// }
+ 
 
 initialState(){
     if(this.state.token)
@@ -126,28 +119,14 @@ send =  (event) => {
 
  getUsers = () => {
     this.state.socket.emit('getAllUsers');
-    if(this.state.allUsers.length) {
-        return (
-            <ul>
- {this.state.allUsers.map(user => {
-             return(
-         <li>{user}</li>
-             )
-         })}
-            </ul>
-        )
-        
-      
-    }
-    
  }
 
     render() {
-          const mute = this.state.mute;
+          
         console.log("Why? this.state.nick",this.state.nick)
         console.log("Why? n,this.state.mute",this.state.mute)
         console.log("Banned",this.state.sended)
-        return this.state.ban ? (<div>YOU ARE BANNED</div>):(
+        return this.state.ban ? (<div className="banned">YOU ARE BANNED</div>):(
             this.state.token &&  
              
            
@@ -162,11 +141,7 @@ send =  (event) => {
              })}
              
            </ul>
-            
-               
-              
-               
-             
+
             <ul ref={this.usersList}>
               {this.renderUsers()}
             </ul>
@@ -195,6 +170,6 @@ send =  (event) => {
 
 
 
-export default   Chat;
+export default    Chat;
 
   
