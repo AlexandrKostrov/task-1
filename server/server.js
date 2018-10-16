@@ -6,8 +6,7 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const session = require('express-session');
-// const passport = require('passport')
-// const FacebookStrategy = require('passport-facebook').Strategy
+
 
 const MongoStore = require('connect-mongo')(session);
 const { User } = require('./models/User');
@@ -31,76 +30,155 @@ io.use(function(socket, next) {
 
 io.on('connection', function(socket){
     console.log('a user connected');
-
-    socket.on('initUser', function (token) {
-        console.log("INCOMINGTOKEN", token);
-        User.findByToken(token,(user) => {
-            console.log("ToKEN", user);
-            io.emit('initUser',user);
-        })
+     
+    User.findByToken(socket.handshake.query.token).then(user => {
+ 
+        console.log("USER BANNED" ,user.banned);
+        if (!user || user.banned){
+            socket.disconnect();
+        }
+        // user.muted = false;
+        // user.save();
+      //  socket.user = user;
+        
+    
+        socket.on('initUser', function () {
+            
+            console.log("INCOMINGTOKEN");
+                socket.emit('initUser',{
+                    id:  user._id,
+                    nick:  user.nick,
+                    color:  user.color,
+                    admin: user.admin,
+                    muted: user.muted,
+                    banned: user.banned,
+                });
+        });
+    
+        socket.on('userList', function () {
+            User.find({active:true}).then(otv => {
+                 io.emit('userList',otv.map((user)=>{
+                     return {
+                         id: user._id,
+                         nick: user.nick,
+                         color: user.color,
+                     };
+                 }))
+             });
          });
-    
-    socket.on('ban', function (token) {
-        User.findByToken(token, (user) => {
-            user.banned = !user.banned;
-            user.save();
-            console.log(user);
-            io.emit('ban',user);
-            io.disconnect(0);
-        })
-    })
-    socket.on('userList', function () {
-       User.find({active:true}).then(otv => {
-        io.emit('userList',otv);
-     });
-    });
-    socket.on('mute', function (token) {
-        User.findByToken(token, (user) => {
-            user.muted = !user.muted;
-            user.save();
-            console.log(user);
-             io.emit('mute',{token:token,muted:user.muted});
-        });  
-    });
-    
-    socket.on('msgSend', function(token) {
-        User.findByToken(token, (user) => {
-            user.sended = !user.sended;
-            user.save();
-            console.log(user);
-             io.emit('msgSend',{token:token,sended:user.sended});
-        }); 
-    })    
 
-    socket.on('logout', function(token) {   
-        console.log('nick',token);
-        User.update({token: token},{$set:{active: false}}).then( 
-             User.find({active:true}).then(otv => {
-             console.log("active users", otv)
-            io.emit('logout',otv);
-            io.disconnect(0);
-         })
-        );  
-    });
-    socket.on('getAllUsers', function() {
-       User.find({}).then(res => io.emit('getAllUsers',res));
-    });
-    socket.on('message', function(msg){
-        
-        const msgObject = JSON.parse(msg);
-        User.findByToken(msgObject.token, (user) => {
-            if(!user.banned || !user.muted){
-                if(msgObject.message.length<200 ){
-                console.log(msgObject);
-                console.log(msgObject.message.length);
-                console.log(socket.request.session.user);
-                msgObject.color = {color:user.color};
-                io.emit('message',msgObject);}
+        socket.on('ban', function (id) {
+            if (user.admin !== true){
+                return;
             }
-        })
+    
+            User.findOne({_id: id}).then((user) => {
+                user.banned = true; 
+                user.save();
+                console.log(user);
+                io.emit('ban',{id: user._id}); 
+            })
+        });
+    
+        socket.on('unban', function (id) {
+            if (user.admin !== true){
+                return;
+            }
+    
+            User.findOne({_id: id}).then((user) => {
+                user.banned = false; 
+                user.save();
+                console.log(user);
+                io.emit('unban',{id: user._id});
+            })
+        });
         
-       
-      });
+        socket.on('mute', function (id) {
+            if (user.admin !== true){
+                return;
+            }
+            console.log("ID OF INCOMMING USER IS",id);
+            User.findOne({_id: id}).then((user) => {
+                user.muted = true; 
+                user.save();
+                console.log(user);
+                io.emit('mute',{id: user._id});
+            });
+        });
+    
+        socket.on('unmute', function (id) {
+            if (user.admin !== true){
+                return;
+            }
+    
+            User.findOne({_id: id}).then((user) => {
+                user.muted = false; 
+                user.save();
+                console.log(user);
+                io.emit('unmute',{id: user._id});
+            });
+        });   
+    
+        socket.on('logout', ()=>{
+            user.active = false;
+            user.save();
+            console.log("DISCONECTED!!!!");
+            io.emit('disconnect',{
+                id: user._id
+            });
+        })
+    
+        socket.on('disconnect', () => {   
+            console.log('disconected user is', user.nick);
+            
+        });
+    
+        socket.on('getAllUsers', function() {
+            if (user.admin !== true){
+                return;
+            }
+    
+           User.find({}).then((res) => {
+                socket.emit('getAllUsers',res.map((user)=>{
+                    return {
+                        id: user._id,
+                        img: user.img,
+                        nick: user.nick,
+                        ban: user.banned,
+                        mute: user.muted,
+                        admin: user.admin,
+                    };
+                }))
+            });
+        });
+    
+        socket.on('message', function(msg){
+            const msgObject = JSON.parse(msg);
+            if (user.muted){
+                return;
+            }
+    
+            // check for time
+           if (Math.floor((Date.now() - msgObject.lastMessage)/1000) < 15) {
+               return;
+           }
+    
+            const {message, color, nick} = msgObject;
+    
+            console.log("THE NICK OF THE SENDER IS", nick)
+            if (!message || message.length > 200){
+                return;
+            }
+    
+            io.emit('message', {
+                message,
+                color,
+                nick,
+                id: user._id,
+            });
+          });
+    })
+   
   });
 
 
@@ -112,21 +190,13 @@ app.use(cookieParser());
 
 
 app.use(sessionMidleware);
-// app.use((req, res, next) => {
-//     req.session.numberOfVisits = req.session.numberOfVisits + 1 || 1;
-//     res.send(`Visits ${req.session.numberOfVisits}`);
-// })
  
- 
-
 app.get('/', (req,res) => {
-    res.send("Connected successfully!");
-  
-})
+    res.send("Connected successfully!"); 
+});
 
 app.post('/logout', (req, res) => {
-    req.session.destroy();
-   
+    req.session.destroy(); 
 });
 
  app.post('/chat', (req, res) => {
@@ -136,27 +206,17 @@ app.post('/logout', (req, res) => {
      const socialNet = req.body.socialNet;
      const picture = req.body.picture;
      const socials = req.body.socials;
-    // const active = true;
      User.authorize(nick, email, password, socialNet, picture, socials, function (user){  
          if(user._id){
-         req.session.user = user._id;
-    
-         res.send(user);}
-         else {
+            req.session.user = user._id;
+            res.send(user);
+        } else {
              res.send({msg:user});
          }
      });
  });
 
-//  app.get('/auth/facebook', passport.authenticate('facebook'));
-//  app.get('/auth/facebook/callback',
-//   passport.authenticate('facebook', { 
-//        successRedirect : '/', 
-//        failureRedirect: '/login' 
-//   }),
-//   function(req, res) {
-//     res.redirect('/');
-//   });
+ 
 
 const port = process.env.PORT || 3001;
 server.listen(port, () => {

@@ -63,7 +63,7 @@ token: {
 UserSchema.statics.authorize =  function (nick, email, password, socialNet, picture, socials, callback) {
     const User = this;
 
-    User.findOne({nick: nick}).then(
+    User.findOne({nick: nick}).then(    
         user => {
             
              if(user){
@@ -84,10 +84,10 @@ UserSchema.statics.authorize =  function (nick, email, password, socialNet, pict
               
                   User.find({}).then( res => {
                       console.log("ALL users", res.length);
-                      let admin = false; 
-                      if(res.length === 0) {
-                        admin = true;
-                      }
+                      let admin = res.length === 0; 
+                    //   if(res.length === 0) {
+                    //     admin = true;
+                    //   }
                       if(/^[a-zA-Z0-9- ]{3,}$/.test(nick) == false) {callback("Your name is not correct!")}
                       else {  
                         const options = {
@@ -97,9 +97,10 @@ UserSchema.statics.authorize =  function (nick, email, password, socialNet, pict
                           const avatar = picture? picture: gravatar.imageUrl(options);
                         console.log("AVATAR IS HERE",avatar);
                         const color = getRandomColor();
+
                         const user = new User({nick: nick, email: email, password: password, active: true, 
                         admin: admin, banned: false, muted: false, sended: false,color: color, img: avatar, socialNet: socialNet});
-                      admin = false;
+                    //   admin = false;
                       bcrypt.genSalt(10, (err, salt) => {
                         bcrypt.hash(user.password, salt, (err, hash) => {
                             if(err) throw err;
@@ -120,13 +121,15 @@ UserSchema.statics.authorize =  function (nick, email, password, socialNet, pict
 }
 
 UserSchema.statics.findByToken = function (token, cb) {
-  const user = this;
-  jwt.verify(token,'supersecret', (err, decode) => {
-      user.findOne({_id:decode,token:token}).then((user) => {
-          
-          cb(user);
-      })
-  }) 
+    const user = this;
+    return new Promise((resolve,reject) => {
+        jwt.verify(token,'supersecret', (err, decode) => {
+            user.findOne({_id:decode,token:token}).then(us => {
+                console.log("INNER USER", us)
+                resolve(us);
+            })
+        })
+    })
 }
 
 
