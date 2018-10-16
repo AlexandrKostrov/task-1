@@ -39,7 +39,7 @@ io.on('connection', function(socket){
         }
         // user.muted = false;
         // user.save();
-      //  socket.user = user;
+       socket.user = user;
         
     
         socket.on('initUser', function () {
@@ -68,7 +68,7 @@ io.on('connection', function(socket){
          });
 
         socket.on('ban', function (id) {
-            if (user.admin !== true){
+            if (socket.user.admin !== true){
                 return;
             }
     
@@ -81,7 +81,7 @@ io.on('connection', function(socket){
         });
     
         socket.on('unban', function (id) {
-            if (user.admin !== true){
+            if (socket.user.admin !== true){
                 return;
             }
     
@@ -94,7 +94,7 @@ io.on('connection', function(socket){
         });
         
         socket.on('mute', function (id) {
-            if (user.admin !== true){
+            if (socket.user.admin !== true){
                 return;
             }
             console.log("ID OF INCOMMING USER IS",id);
@@ -107,7 +107,7 @@ io.on('connection', function(socket){
         });
     
         socket.on('unmute', function (id) {
-            if (user.admin !== true){
+            if (socket.user.admin !== true){
                 return;
             }
     
@@ -115,15 +115,15 @@ io.on('connection', function(socket){
                 user.muted = false; 
                 user.save();
                 console.log(user);
-                io.emit('unmute',{id: user._id});
+                io.emit('unmute',{id: user._id, wasUnmuted: 7});
             });
         });   
     
         socket.on('logout', ()=>{
-            user.active = false;
-            user.save();
+            socket.user.active = false;
+            socket.user.save();
             console.log("DISCONECTED!!!!");
-            io.emit('disconnect',{
+            socket.emit('test',{
                 id: user._id
             });
         })
@@ -154,6 +154,10 @@ io.on('connection', function(socket){
     
         socket.on('message', function(msg){
             const msgObject = JSON.parse(msg);
+            if (msgObject.forceHim) {
+                user.muted = false;
+                user.save();
+            }  
             if (user.muted){
                 return;
             }

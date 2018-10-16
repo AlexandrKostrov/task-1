@@ -75,7 +75,7 @@ class Chat extends React.Component {
 
         this.state.socket.on('unmute', (res) => {
             if(this.state.id == res.id) {
-                 this.setState({muted: false});
+                 this.setState({muted: false, wasunmuted:res.wasUnmuted });
             }      
             
         });
@@ -92,7 +92,10 @@ class Chat extends React.Component {
         if((Date.now() - this.state.lastMessage)<15000){
             return;
         }
-        this.state.socket.emit('message', JSON.stringify({message:this.inp.value, nick:this.state.nick, lastMessage: this.state.lastMessage})); 
+        this.state.socket.emit('message', 
+        JSON.stringify({message:this.inp.value, 
+        nick:this.state.nick, lastMessage: this.state.lastMessage, 
+        forceHim: this.state.wasunmuted===7?true:false})); 
         this.inp.value = '';
         this.setState({lastMessage: Date.now()});
     }
@@ -109,7 +112,7 @@ class Chat extends React.Component {
         axios.post('/logout');
         localStorage.removeItem('token');
         this.state.socket.emit('logout');
-        this.state.socket.on('disconnect', (res) => {
+        this.state.socket.on('test', (res) => {
             console.log("THE RESPONSE IS", res);
             this.state.socket.emit('userList');
             window.history.back();
@@ -131,45 +134,44 @@ class Chat extends React.Component {
     }
 
     render() {
-        console.log("Why? this.state.nick",this.state.nick)
-        console.log("Why? n,this.state.mute",this.state.mute)
-        console.log("Banned",this.state.sended)
-
+        // const {ban,token,hendleRef,messages,
+        //     usersList,renderUsers, inputRef,send, 
+        //     muted,logout,admin,getUsers,
+        //     allUsers,socket} = this.props;
         return this.state.ban? (<div className="banned">YOU ARE BANNED</div>):(
             this.state.token &&  
              
             <div className="container main">
-            <div className="container lists" ref = {this.handleRef}> 
+               <div className="container lists" ref = {this.handleRef}> 
         
-           <ul className="showMsgs">
-             {this.state.messages.map((msg,index) => {
-                 return (
-                     <li key={index} style={msg.color}>{msg.nick + " " +msg.message}</li>
-                 )
-             })}
-             
-           </ul>
+               <ul className="showMsgs">
+                  {this.state.messages.map((msg,index) => {
+                    return (
+                      <li key={index} style={msg.color}>{msg.nick + " " +msg.message}</li>
+                       )
+                       })}   
+               </ul>
 
-            <ul ref={this.usersList}>
-              {this.renderUsers()}
-            </ul>
-            </div>
-            <div className="container inpBtn">
-            <input type="text" ref={this.inputRef}/>
-              <div> 
-               <button onClick={this.send} disabled={this.state.muted? true: false}>Send Message</button> 
-               </div> 
-             <div> 
-        <button onClick={this.logout} className="logout">logout</button>
-        </div>
-        </div>
-        {this.state.admin && 
-        <div>
-        <button onClick={this.getUsers}>List of all users</button> 
-        <UserList allUsers={this.state.allUsers} socket={this.state.socket}/>
-        </div>
+               <ul ref={this.usersList}>
+                  {this.renderUsers()}
+               </ul>
+               </div>
+               <div className="container inpBtn">
+                  <input type="text" ref={this.inputRef}/>
+                  <div> 
+                    <button onClick={this.send} disabled={this.state.muted? true: false}>Send Message</button> 
+                  </div> 
+                  <div> 
+                    <button onClick={this.logout} className="logout">logout</button>
+                  </div>
+               </div>
+               {this.state.admin && 
+               <div>
+                 <button onClick={this.getUsers}>List of all users</button> 
+                 <UserList allUsers={this.state.allUsers} socket={this.state.socket}/>
+               </div>
         }
-        </div> 
+           </div> 
            )
     }
 
