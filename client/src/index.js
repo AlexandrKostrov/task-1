@@ -3,13 +3,15 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
 import { createStore, applyMiddleware } from 'redux';
+import rootReducer from './components/reducers';
 import { Provider } from 'react-redux';
+import loginMiddleware from './middleWares/loginMiddleware';
+
+const store = createStore(rootReducer, applyMiddleware(loginMiddleware));
 
 ReactDOM.render(
-   <App  />
-, document.getElementById('root'));
-
-// If you want your app to work offline and load faster, you can change
-// unregister() to register() below. Note this comes with some pitfalls.
-// Learn more about service workers: http://bit.ly/CRA-PWA
- 
+  <Provider store={store}>
+    <App />
+  </Provider>,
+  document.getElementById('root')
+);
