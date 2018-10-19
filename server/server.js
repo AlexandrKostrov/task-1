@@ -199,6 +199,7 @@ app.post('/logout', (req, res) => {
 });
 
 app.post('/chat', (req, res) => {
+  console.log(req);
   const nick = req.body.nick;
   const email = req.body.email;
   const password = req.body.password;

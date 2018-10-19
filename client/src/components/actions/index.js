@@ -1,8 +1,12 @@
-import login from '../../api/login';
+import { login } from '../../api/login';
 
 export const addUser = (data, history) => ({
   type: 'USER',
-  promise: login,
   data: data,
   history: history,
+});
+
+export const activeUsers = (users) => ({
+  type: 'ACTIVE_USERS',
+  users: users,
 });
